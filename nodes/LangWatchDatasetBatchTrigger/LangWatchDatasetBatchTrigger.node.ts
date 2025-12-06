@@ -4,10 +4,10 @@ import {
 	INodeTypeDescription,
 	INodeExecutionData,
 	NodeOperationError,
+	sleep,
 } from 'n8n-workflow';
 import type { LangWatchCredentials, LangWatchDatasetResponse, ProcessingOptions } from '../../shared/types';
 import { randomUUID } from 'crypto';
-import { setTimeout } from 'timers/promises';
 
 export class LangWatchDatasetBatchTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -184,7 +184,7 @@ export class LangWatchDatasetBatchTrigger implements INodeType {
 			for (let i = 0; i < rows.length && !cancelled; i++) {
 				this.emit([[emitRow(rows[i], i)]]);
 				if (emitIntervalMs > 0) {
-					await setTimeout(emitIntervalMs);
+					await sleep(emitIntervalMs);
 				}
 			}
 		};
