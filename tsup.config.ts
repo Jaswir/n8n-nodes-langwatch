@@ -16,12 +16,16 @@ export default defineConfig({
   splitting: false,
   treeshake: true,
   minify: false,
-  // Bundle sdk + templating to avoid nested node_modules in custom dir
-  noExternal: ['langwatch', 'liquidjs'],
+  // Bundle templating only; keep LangWatch SDK external so it isn't included in the n8n bundle
+  noExternal: ['liquidjs'],
   // Keep n8n-provided packages external
   external: ['n8n-workflow'],
   // Preserve file structure
   shims: false,
+  esbuildOptions(options) {
+    options.drop = ['console'];
+    options.define = { global: 'undefined' };
+  },
 });
 
 

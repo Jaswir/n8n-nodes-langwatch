@@ -250,7 +250,7 @@ export class LangWatchEvaluation implements INodeType {
 					apiKey: string;
 				};
 
-				const response = await this.helpers.requestWithAuthentication.call(this, 'langwatchApi', {
+				const response = await this.helpers.httpRequestWithAuthentication.call(this, 'langwatchApi', {
 					baseURL: credentials.host,
 					method: 'GET',
 					url: '/api/evaluations/list',
@@ -333,7 +333,7 @@ export class LangWatchEvaluation implements INodeType {
 				},
 			};
 
-			await this.helpers.requestWithAuthentication.call(this, 'langwatchApi', {
+			await this.helpers.httpRequestWithAuthentication.call(this, 'langwatchApi', {
 				baseURL: credentials.host,
 				method: 'POST',
 				url: '/api/evaluations/batch/log_results',
@@ -401,7 +401,7 @@ export class LangWatchEvaluation implements INodeType {
 				const evaluationData = parseJson(evaluationDataRaw);
 				const evaluatorSettings = parseJson(evaluatorSettingsRaw);
 
-				const evaluation = await this.helpers.requestWithAuthentication.call(this, 'langwatchApi', {
+				const evaluation = await this.helpers.httpRequestWithAuthentication.call(this, 'langwatchApi', {
 					baseURL: credentials.host,
 					method: 'POST',
 					url: `/api/evaluations/${encodeURIComponent(evaluatorId)}/evaluate`,
@@ -469,7 +469,7 @@ export class LangWatchEvaluation implements INodeType {
 				entries.push(entry);
 			}
 
-			await this.helpers.requestWithAuthentication.call(this, 'langwatchApi', {
+			await this.helpers.httpRequestWithAuthentication.call(this, 'langwatchApi', {
 				baseURL: credentials.host,
 				method: 'POST',
 				url: `/api/dataset/${encodeURIComponent(datasetSlug)}/entries`,

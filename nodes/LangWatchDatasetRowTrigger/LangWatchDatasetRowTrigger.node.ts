@@ -95,7 +95,7 @@ export class LangWatchDatasetRowTrigger implements INodeType {
 			let datasetEntries: any[];
 
 			if (needsReload) {
-				const data = (await this.helpers.requestWithAuthentication.call(this, 'langwatchApi', {
+				const data = (await this.helpers.httpRequestWithAuthentication.call(this, 'langwatchApi', {
 					baseURL: credentials.host,
 					method: 'GET',
 					url: `/api/dataset/${datasetId}`,

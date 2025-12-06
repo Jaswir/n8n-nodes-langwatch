@@ -9,7 +9,6 @@ import {
 	NodeConnectionTypes,
 	NodeOperationError,
 } from 'n8n-workflow';
-import { LangWatch } from 'langwatch';
 import type {
 	LangWatchCredentials,
 	VariablesCollection,
@@ -284,22 +283,24 @@ export class LangWatchPrompt implements INodeType {
 	methods = {
 		loadOptions: {
 			async getPrompts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const credentials = (await this.getCredentials('langwatchApi')) as {
-					host: string;
-					apiKey: string;
-				};
+				const credentials = (await this.getCredentials('langwatchApi')) as LangWatchCredentials
 
-				const langwatch = new LangWatch({
-					apiKey: credentials.apiKey,
-					endpoint: credentials.host,
-				});
+				const prompts = (await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'langwatchApi',
+					{
+						baseURL: credentials.host,
+						method: 'GET',
+						url: '/api/prompts',
+						json: true,
+					},
+				)) as Array<{ id?: string; handle?: string | null }>
 
-				const prompts = await langwatch.prompts.getAll();
 				return prompts.map((prompt) => ({
 					name: prompt.handle || prompt.id || 'Unnamed Prompt',
 					value: prompt.id || '',
 					description: prompt.handle ? `Handle: ${prompt.handle}` : `ID: ${prompt.id}`,
-				}));
+				}))
 			},
 		},
 	};
@@ -326,14 +327,24 @@ export class LangWatchPrompt implements INodeType {
 
 		const credentials = (await this.getCredentials('langwatchApi')) as LangWatchCredentials;
 
-		const langwatch = new LangWatch({
-			apiKey: credentials.apiKey,
-			endpoint: credentials.host,
-		});
-
 		try {
-			// Fetch the prompt using the SDK
-			const prompt = await langwatch.prompts.get(finalPromptId, versionOptions);
+			const query: IDataObject = {}
+			if (versionOptions?.version) {
+				query.version = versionOptions.version
+			}
+
+			const prompt = (await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'langwatchApi',
+				{
+					baseURL: credentials.host,
+					method: 'GET',
+					url: `/api/prompts/${encodeURIComponent(finalPromptId)}`,
+					qs: query,
+					json: true,
+				},
+			)) as IDataObject
+
 			if (!prompt) {
 				throw new NodeOperationError(
 					this.getNode(),
@@ -361,9 +372,7 @@ export class LangWatchPrompt implements INodeType {
 				const variables = collectVariables(this, variableSource);
 
 				try {
-					const compiledPrompt = strict
-						? prompt.compileStrict(variables)
-						: prompt.compile(variables);
+					const compiledPrompt = compilePromptLocally(plainPrompt, variables, strict);
 
 					const plainCompiled = toPlain(compiledPrompt) as IDataObject;
 					delete (plainCompiled as any).promptData;
@@ -391,6 +400,45 @@ export class LangWatchPrompt implements INodeType {
 			throw error;
 		}
 	}
+}
+
+function compilePromptLocally(
+	prompt: IDataObject,
+	variables: TemplateVariables,
+	strict: boolean,
+): IDataObject {
+	const source = (prompt as any).prompt as string | undefined;
+	const messages = (prompt as any).messages as
+		| Array<{ role: string; content: string }>
+		| undefined;
+
+	const render = (template: string | undefined): string | undefined => {
+		if (template == null) return template;
+		return template.replace(/{{\s*([\w.]+)\s*}}/g, (_match, key) => {
+			const value = (variables as any)[key];
+			if (value === undefined || value === null) {
+				if (strict) {
+					throw new Error(`Missing required template variable: ${key}`);
+				}
+				return '';
+			}
+			return String(value);
+		});
+	};
+
+	const compiledPrompt = render(source);
+	const compiledMessages = Array.isArray(messages)
+		? messages.map((m) => ({
+				...m,
+				content: render(m.content),
+		  }))
+		: undefined;
+
+	return {
+		...prompt,
+		prompt: compiledPrompt,
+		messages: compiledMessages,
+	};
 }
 
 function collectManualVariables(executeFunctions: IExecuteFunctions): TemplateVariables {

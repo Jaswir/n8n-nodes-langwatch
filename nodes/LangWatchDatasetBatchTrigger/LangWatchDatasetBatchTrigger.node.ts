@@ -6,6 +6,8 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 import type { LangWatchCredentials, LangWatchDatasetResponse, ProcessingOptions } from '../../shared/types';
+import { randomUUID } from 'crypto';
+import { setTimeout } from 'timers/promises';
 
 export class LangWatchDatasetBatchTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -80,8 +82,8 @@ export class LangWatchDatasetBatchTrigger implements INodeType {
 					description: 'Provide an existing experiment ID or a slug for a new experiment.',
 				});
 			}
-			runId = (globalThis as any)?.crypto?.randomUUID?.() ? (globalThis as any).crypto.randomUUID() : `run_${Date.now()}`;
-			experimentInfo = await this.helpers.requestWithAuthentication.call(this, 'langwatchApi', {
+			runId = randomUUID();
+			experimentInfo = await this.helpers.httpRequestWithAuthentication.call(this, 'langwatchApi', {
 				baseURL: credentials.host,
 				method: 'POST',
 				url: '/api/experiment/init',
@@ -96,7 +98,7 @@ export class LangWatchDatasetBatchTrigger implements INodeType {
 			});
 		}
 
-		const data = (await this.helpers.requestWithAuthentication.call(this, 'langwatchApi', {
+		const data = (await this.helpers.httpRequestWithAuthentication.call(this, 'langwatchApi', {
 			baseURL: credentials.host,
 			method: 'GET',
 			url: `/api/dataset/${datasetId}`,
@@ -182,7 +184,7 @@ export class LangWatchDatasetBatchTrigger implements INodeType {
 			for (let i = 0; i < rows.length && !cancelled; i++) {
 				this.emit([[emitRow(rows[i], i)]]);
 				if (emitIntervalMs > 0) {
-					await new Promise((r) => setTimeout(r, emitIntervalMs));
+					await setTimeout(emitIntervalMs);
 				}
 			}
 		};
