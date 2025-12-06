@@ -25,8 +25,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1
       langwatch:
-        specifier: ^0.7.1
-        version: 0.7.1(334d00c1206d0a81006e6f68ca42435b)
+        specifier: file:../langwatch/typescript-sdk
+        version: file:../langwatch/typescript-sdk(334d00c1206d0a81006e6f68ca42435b)
       liquidjs:
         specifier: ^10.21.1
         version: 10.21.1
@@ -1708,8 +1708,8 @@ packages:
       openai:
         optional: true
 
-  langwatch@0.7.1:
-    resolution: {integrity: sha512-ifwy4R18VG4ICnw9HBP9ROKHQ6r9ZPW+4taMYlj8wYKjulJ+vWW9vhdQrVdIUzV0LsAtUTN7mD+KLUV+ru2KEA==}
+  langwatch@file:../langwatch/typescript-sdk:
+    resolution: {directory: ../langwatch/typescript-sdk, type: directory}
     engines: {node: '>=20', pnpm: '>=8'}
     hasBin: true
     peerDependencies:
@@ -4227,7 +4227,7 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 2.1.0(@opentelemetry/api@1.9.0)
       openai: 5.12.2(zod@4.1.11)
 
-  langwatch@0.7.1(334d00c1206d0a81006e6f68ca42435b):
+  langwatch@file:../langwatch/typescript-sdk(334d00c1206d0a81006e6f68ca42435b):
     dependencies:
       '@ai-sdk/openai': 2.0.36(zod@4.1.11)
       '@langchain/core': 0.3.77(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.205.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))(openai@5.12.2(zod@4.1.11))
