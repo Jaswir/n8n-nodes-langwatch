@@ -1,6 +1,6 @@
 {
-  "name": "@langwatch/n8n-nodes-langwatch",
-  "version": "1.0.0",
+  "name": "@jaswirraghoe/n8n-nodes-langwatch",
+  "version": "1.0.2",
   "description": "LangWatch nodes for n8n - observability, evaluation, and prompt management for LLM applications",
   "keywords": [
     "n8n-community-node-package",
@@ -15,12 +15,12 @@
   "license": "MIT",
   "homepage": "",
   "author": {
-    "name": "LangWatch Team",
-    "email": "hey@langwatch.ai"
+    "name": "Jaswir Raghoe",
+    "email": "jaswirraghoe@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/langwatch/n8n-nodes"
+    "url": "https://github.com/Jaswir/n8n-nodes-langwatch"
   },
   "packageManager": "pnpm@10.17.1",
   "engines": {

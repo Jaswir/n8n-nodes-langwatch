@@ -372,7 +372,7 @@ export class LangWatchPrompt implements INodeType {
 				const variables = collectVariables(this, variableSource);
 
 				try {
-					const compiledPrompt = compilePromptLocally(plainPrompt, variables, strict);
+					const compiledPrompt = compilePromptLocally(this, plainPrompt, variables, strict);
 
 					const plainCompiled = toPlain(compiledPrompt) as IDataObject;
 					delete (plainCompiled as any).promptData;
@@ -403,6 +403,7 @@ export class LangWatchPrompt implements INodeType {
 }
 
 function compilePromptLocally(
+	executeFunctions: IExecuteFunctions,
 	prompt: IDataObject,
 	variables: TemplateVariables,
 	strict: boolean,
@@ -418,7 +419,10 @@ function compilePromptLocally(
 			const value = (variables as any)[key];
 			if (value === undefined || value === null) {
 				if (strict) {
-					throw new Error(`Missing required template variable: ${key}`);
+					throw new NodeOperationError(
+						executeFunctions.getNode(),
+						`Missing required template variable: ${key}`,
+					);
 				}
 				return '';
 			}
